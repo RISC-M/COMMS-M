@@ -4,8 +4,8 @@
 module out_port #(
     parameter N = 2,
     parameter WIDTH = 32,
-    parameter ADDR_WIDTH = 6,
-    parameter bit [ADDR_WIDTH-1:0] ADDRESS  = 6'b000000
+    parameter ADDR_WIDTH = 7,
+    parameter bit [ADDR_WIDTH-1:0] ADDRESS  = 7'b0000000
 )(
     input  wire  clk,
     input  wire  rst_n,

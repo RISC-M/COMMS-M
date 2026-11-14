@@ -4,7 +4,7 @@
 module shifter_fu #(
     parameter IN_N = 2,
     parameter OUT_N = 2,
-    parameter ADDR_WIDTH = 6,
+    parameter ADDR_WIDTH = 7,
     parameter WIDTH = 32,
     //parameter bit [ADDR_WIDTH-1:0] SHIFT_T = 3,   Optional
     parameter bit [ADDR_WIDTH-1:0] SHIFT_O = 4,

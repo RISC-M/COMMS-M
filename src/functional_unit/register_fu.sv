@@ -4,8 +4,8 @@
 module register_fu #(
     parameter N = 4,
     parameter WIDTH = 32,
-    parameter ADDR_WIDTH = 6,
-    parameter bit [ADDR_WIDTH-1:0] ADDRESS_MASK  = 6'b000111
+    parameter ADDR_WIDTH = 7,
+    parameter bit [ADDR_WIDTH-1:0] ADDRESS_MASK  = 7'b0000111
 )(
     input  wire  clk,
     input  wire  rst_n,

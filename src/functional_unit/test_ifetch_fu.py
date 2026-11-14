@@ -35,7 +35,7 @@ def generate_instr(instr: list[Instr]) -> int:
     assert len(instr) == 4
     out = 0
     for idx, inst in enumerate(instr):
-        inst_int = (inst.dest << 6) | inst.source
+        inst_int = (inst.dest << 7) | inst.source
         out |= (inst_int) << (idx * 16)
     return out
 

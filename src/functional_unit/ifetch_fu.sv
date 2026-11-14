@@ -5,7 +5,7 @@ module ifetch_fu #(
     parameter N = 4,
     parameter IN_N = 2,
     parameter OUT_N = 2,
-    parameter ADDR_WIDTH = 6,
+    parameter ADDR_WIDTH = 7,
     parameter WIDTH = 32,
     parameter bit [ADDR_WIDTH-1:0] PC_T = 1,
     parameter bit [ADDR_WIDTH-1:0] PC_R = 1
@@ -75,8 +75,8 @@ module ifetch_fu #(
         instr_group = instruction_mem[pc];
         for (i = 0; i < N; i++) begin
             instr_single = instr_group[((i + 1) * 16) - 1 -: 16];
-            read_addr_busses[i] = instr_single[5:0];
-            write_addr_busses[i] = instr_single[11:6];
+            read_addr_busses[i] = instr_single[6:0];
+            write_addr_busses[i] = instr_single[13:7];
         end
     end
 endmodule
