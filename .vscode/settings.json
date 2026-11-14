@@ -1,6 +1,7 @@
 {
   "verilog.linting.linter": "verilator",
   "verilog.formatting.verilogHDL.formatter": "verible-verilog-format",
+  "verilog.linting.verilator.arguments": "-f verilator.vc",
   "files.exclude": {
     "**/__pycache__": true
   },

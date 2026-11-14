@@ -21,8 +21,8 @@ def generate_runner(
         build_args=[
             "--trace-fst",
             "--trace-structs",
-            "-y",
-            str(Path(file).resolve().parent),
+            "-F",
+            str(Path(__file__).resolve().parent.parent / "verilator.vc"),
         ],
         parameters=parameters if parameters else {},
     )

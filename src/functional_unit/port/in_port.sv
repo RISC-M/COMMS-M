@@ -7,7 +7,7 @@ module in_port #(
     parameter ADDR_WIDTH = 6,
     parameter bit [ADDR_WIDTH-1:0] ADDRESS  = 6'b000000,
     parameter REGISTER_WITH_BYPASS = 0
-)(
+) (
     input  wire  clk,
     input  wire  rst_n,
 

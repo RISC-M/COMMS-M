@@ -1,8 +1,5 @@
 `default_nettype none
 `timescale 1ps/1ps
-`include "./port/in_port.sv"
-`include "./port/out_port.sv"
-
 
 module integer_fu #(
     parameter IN_N = 2,

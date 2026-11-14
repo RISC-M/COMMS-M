@@ -1,13 +1,6 @@
-//All of the following comments are questions asked by Dhruv Bahuguna
-
-//1. Why do we have these? I'm not entirely sure. The includes make sense but I don't know if that is how we did it in 270
 `default_nettype none
 `timescale 1ps/1ps
-`include "./port/in_port.sv"
-`include "./port/out_port.sv"
 
-//2. Setting module name and default params, 2 input busses, 1 for trigger and operand, why 2 output busses?
-//Remaining parameters all make sense, changed the port names to be shift instead of int, and gave them unique nums
 module shifter_fu #(
     parameter IN_N = 2,
     parameter OUT_N = 2,
