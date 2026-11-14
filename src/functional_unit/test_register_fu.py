@@ -59,5 +59,5 @@ async def test_integer_fu(dut):
 
     assert dut.read_busses[0].value == 10
     assert dut.read_busses[1].value == 5
-    assert dut.read_busses_valid[0].value
-    assert dut.read_busses_valid[1].value
+    assert dut.read_busses_valid.value[0]
+    assert dut.read_busses_valid.value[1]
