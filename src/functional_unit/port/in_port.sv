@@ -11,17 +11,17 @@ module in_port #(
     input  wire  clk,
     input  wire  rst_n,
 
-    input  wire  [WIDTH-1:0]      busses      [0:N-1],
-    input  wire  [ADDR_WIDTH-1:0] addr_busses [0:N-1],
+    input  wire  [WIDTH-1:0]      busses          [0:N-1],
+    input  wire  [ADDR_WIDTH-1:0] addr_busses     [0:N-1],
     input  wire                   status_bus,
-    input  wire  [1:0]            condition_flags,
+    input  wire  [1:0]            condition_flags [0:N-1],
 
     output logic [WIDTH-1:0]      data,
     output logic                  data_valid
 );
 
     logic [N-1:0] bus_valid;
-    logic [  1:0] condition_flags_r;
+    logic [  1:0] condition_flags_r [0:N-1];
 
 
     int i;
@@ -29,9 +29,10 @@ module in_port #(
     if (!rst_n)
         bus_valid <= 0;
     else begin
-        for (i = 0 ; i < N; i++)
+        for (i = 0 ; i < N; i++) begin
             bus_valid[i] <= addr_busses[i] == ADDRESS;
-        condition_flags_r <= condition_flags;
+            condition_flags_r[i] <= condition_flags[i];
+        end
     end
 
     logic [WIDTH-1:0] data_in;
@@ -44,8 +45,8 @@ module in_port #(
         for (j = 0; j < N; j++)
         if (bus_valid[j]) begin
             data_in = busses[j];
-            data_in_valid = condition_flags[0] ? 
-                (condition_flags[1] ? status_bus : ~status_bus) 
+            data_in_valid = condition_flags[j][0] ? 
+                (condition_flags[j][1] ? status_bus : ~status_bus) 
                 : 1;
         end
     end

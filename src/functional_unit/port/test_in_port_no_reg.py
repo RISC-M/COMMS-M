@@ -42,7 +42,7 @@ async def test_in_port(dut):
 
     dut.addr_busses[0].value = 0x0
     dut.addr_busses[1].value = 0x1
-    dut.condition_flags.value = 0b00
+    dut.condition_flags[0].value = 0b00
 
     await ReadOnly()
     assert dut.data_valid.value == 0
@@ -70,7 +70,7 @@ async def test_in_port(dut):
     await dut.clk.rising_edge
     await ReadWrite()
 
-    dut.condition_flags.value = 0b01
+    dut.condition_flags[1].value = 0b01
     dut.status_bus.value = 0
     dut.addr_busses[0].value = 0x1
     dut.addr_busses[1].value = 0x0
@@ -83,7 +83,7 @@ async def test_in_port(dut):
     assert dut.data_valid.value == 1
     assert dut.data.value == 0xCAFECAFE
 
-    dut.condition_flags.value = 0b11
+    dut.condition_flags[1].value = 0b11
     dut.status_bus.value = 0
 
     await dut.clk.rising_edge
