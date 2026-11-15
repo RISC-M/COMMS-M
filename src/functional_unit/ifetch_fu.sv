@@ -13,17 +13,18 @@ module ifetch_fu #(
     input wire clk,
     input wire rst_n,
 
-    input  wire  [ADDR_WIDTH-1:0] in_addr_busses [0:IN_N-1],
-    input  wire  [WIDTH-1:0]      in_busses   [0:IN_N-1],
-    input  wire  [1:0]            condition_flags [0:IN_N-1],
+    input  wire  [ADDR_WIDTH-1:0] in_addr_busses     [0:IN_N-1],
+    input  wire  [WIDTH-1:0]      in_busses          [0:IN_N-1],
+    input  wire  [1:0]            in_condition_flags [0:IN_N-1],
     input  wire                   status_bus,
 
-    input  wire  [ADDR_WIDTH-1:0] out_addr_busses [0:OUT_N-1],
-    output logic [WIDTH-1:0]      out_busses   [0:OUT_N-1],
-    output logic                  busses_valid [0:OUT_N-1],
+    input  wire  [ADDR_WIDTH-1:0] out_addr_busses    [0:OUT_N-1],
+    output logic [WIDTH-1:0]      out_busses         [0:OUT_N-1],
+    output logic                  busses_valid       [0:OUT_N-1],
 
-    output logic [ADDR_WIDTH-1:0] read_addr_busses  [0:N-1],  
-    output logic [ADDR_WIDTH-1:0] write_addr_busses [0:N-1]
+    output logic [ADDR_WIDTH-1:0] read_addr_busses   [0:N-1],  
+    output logic [ADDR_WIDTH-1:0] write_addr_busses  [0:N-1],
+    output logic [1:0]            condition_flags    [0:N-1]
 );
 
     logic [64-1:0] instruction_mem [0:8191];
@@ -43,7 +44,7 @@ module ifetch_fu #(
         .busses(in_busses),
         .addr_busses(in_addr_busses),
         .status_bus(status_bus),
-        .condition_flags(condition_flags),
+        .condition_flags(in_condition_flags),
         .data(pc_trigger),
         .data_valid(pc_triggered)
     );
@@ -82,6 +83,7 @@ module ifetch_fu #(
             instr_single = instr_group[((i + 1) * 16) - 1 -: 16];
             read_addr_busses[i] = instr_single[6:0];
             write_addr_busses[i] = instr_single[13:7];
+            condition_flags[i] = instr_single[15:14];
         end
     end
 endmodule

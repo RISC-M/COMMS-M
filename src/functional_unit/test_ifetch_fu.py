@@ -29,13 +29,14 @@ async def generate_clock(dut):
 class Instr:
     source: int
     dest: int
+    condition: int
 
 
 def generate_instr(instr: list[Instr]) -> int:
     assert len(instr) == 4
     out = 0
     for idx, inst in enumerate(instr):
-        inst_int = (inst.dest << 7) | inst.source
+        inst_int = (inst.condition << 14) | (inst.dest << 7) | inst.source
         out |= (inst_int) << (idx * 16)
     return out
 
@@ -48,8 +49,12 @@ async def test_ifetch_fu(dut):
     await ReadWrite()
 
     imem = [0] * 8192
-    imem[0] = generate_instr([Instr(1, 2), Instr(3, 4), Instr(5, 6), Instr(7, 8)])
-    imem[1] = generate_instr([Instr(2, 1), Instr(4, 3), Instr(6, 5), Instr(8, 7)])
+    imem[0] = generate_instr(
+        [Instr(1, 2, 0), Instr(3, 4, 1), Instr(5, 6, 3), Instr(7, 8, 3)]
+    )
+    imem[1] = generate_instr(
+        [Instr(2, 1, 0), Instr(4, 3, 1), Instr(6, 5, 3), Instr(8, 7, 0)]
+    )
 
     dut.instruction_mem.value = imem
     dut.out_addr_busses[0].value = 0
@@ -70,6 +75,11 @@ async def test_ifetch_fu(dut):
     assert dut.write_addr_busses[2].value == 6
     assert dut.write_addr_busses[3].value == 8
 
+    assert dut.condition_flags[0].value == 0
+    assert dut.condition_flags[1].value == 1
+    assert dut.condition_flags[2].value == 3
+    assert dut.condition_flags[3].value == 3
+
     assert dut.out_busses[0].value == 0
 
     dut.in_addr_busses[0].value = 1
@@ -88,6 +98,11 @@ async def test_ifetch_fu(dut):
     assert dut.write_addr_busses[1].value == 3
     assert dut.write_addr_busses[2].value == 5
     assert dut.write_addr_busses[3].value == 7
+
+    assert dut.condition_flags[0].value == 0
+    assert dut.condition_flags[1].value == 1
+    assert dut.condition_flags[2].value == 3
+    assert dut.condition_flags[3].value == 0
 
     assert dut.out_busses[0].value == 1
 
