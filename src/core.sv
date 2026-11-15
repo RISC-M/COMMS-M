@@ -13,7 +13,7 @@ module core (
     logic [ADDR_WIDTH-1:0]  raddr_busses    [0:3];
     logic [ADDR_WIDTH-1:0]  waddr_busses    [0:3];
     logic [1:0]             condition_flags [0:3];
-    logic                   status_bus;
+    logic                   status_bus = 0;
 
     // Bus Multiplexers
     localparam BUS_0_OUT_N = 3;
@@ -86,8 +86,8 @@ module core (
 
     // Connect ifetch trigger and result to busses 0 and 1
     ifetch_fu #(
-        .PC_T(1),
-        .PC_R(1)
+        .PC_T(8),
+        .PC_R(8)
     ) ifetch_fu_inst (
         .clk(clk),
         .rst_n(rst_n),
@@ -109,9 +109,9 @@ module core (
     integer_fu #(
         .IN_N(2),
         .OUT_N(2),
-        .ADD_T(6'h0),
-        .INT_O(6'h1),
-        .INT_R(6'h2)
+        .INT_O(9),
+        .ADD_T(10),
+        .INT_R(9)
     ) integer_fu_0 (
         .clk(clk),
         .rst_n(rst_n),

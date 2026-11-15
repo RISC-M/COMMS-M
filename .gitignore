@@ -16,3 +16,6 @@ venv
 sim_build
 
 __pycache__
+
+src/code/*.out
+src/code/*.mc
