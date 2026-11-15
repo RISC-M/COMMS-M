@@ -24,7 +24,7 @@ async def generate_clock(dut):
 
 
 @cocotb.test()
-async def test_integer_fu(dut):
+async def test_register_fu_no_cond(dut):
     cocotb.start_soon(generate_clock(dut))
 
     await dut.clk.rising_edge
@@ -58,6 +58,49 @@ async def test_integer_fu(dut):
     await ReadWrite()
 
     assert dut.read_busses[0].value == 10
+    assert dut.read_busses[1].value == 5
+    assert dut.read_busses_valid.value[0]
+    assert dut.read_busses_valid.value[1]
+
+
+@cocotb.test()
+async def test_register_fu_with_cond(dut):
+    cocotb.start_soon(generate_clock(dut))
+
+    await dut.clk.rising_edge
+    await ReadWrite()
+
+    dut.rst_n.value = 0
+    for i in range(2):
+        await dut.clk.rising_edge
+    await ReadWrite()
+    dut.rst_n.value = 1
+
+    # Write to r0 on bus 0 and r1 on bus 1
+    dut.waddr_busses[0].value = 0x0
+    dut.waddr_busses[1].value = 0x1
+    dut.condition_flags[0].value = 0b01
+    dut.condition_flags[1].value = 0b11
+
+    await dut.clk.rising_edge
+    await ReadWrite()
+    # 5 to address 0 and 10 to address 1
+    dut.write_busses[0].value = 5
+    dut.write_busses[1].value = 10
+    dut.status_bus.value = 1
+
+    # Clear write address
+    dut.waddr_busses[0].value = 0x30
+    dut.waddr_busses[1].value = 0x30
+
+    # Read from r1 on bus 0 and r0 on bus 1
+    dut.raddr_busses[0].value = 0x1
+    dut.raddr_busses[1].value = 0x0
+
+    await dut.clk.rising_edge
+    await ReadWrite()
+
+    assert dut.read_busses[0].value == 0
     assert dut.read_busses[1].value == 5
     assert dut.read_busses_valid.value[0]
     assert dut.read_busses_valid.value[1]
