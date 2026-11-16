@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from io import SEEK_SET
 import sys
 from enum import Enum
 
@@ -54,15 +55,46 @@ class Instr:
     condition: Condition = Condition.NO_COND
 
 
+def normalize_line(line: str) -> list[str]:
+    comment_start = line.find("//")
+    if comment_start != -1:
+        return line[:comment_start].split()
+    return line.split()
+
+
 def assemble_code(in_name: str, out_name: str):
     in_f = open(in_name, "r")
     out_f = open(out_name, "wb")
 
+    symbol_table: dict[int, str] = {}
     machine_code = []
+
+    # Generate symbol table
+    pc = 0
+    for line in in_f:
+        line = normalize_line(line)
+        if len(line) == 0:
+            continue
+        if len(line) == 1:
+            assert line[0][-1] == ":", "symbol definitions must end in a colon"
+            symbol = line[0][:-1]
+            if symbol in port_mapping:
+                print("Error: cannot name a symbol the same as a port")
+                exit(1)
+            symbol_table[symbol] = pc
+            continue
+        assert len(line) == 4
+        pc += 1
+
+    in_f.seek(0, SEEK_SET)
 
     for line in in_f:
         code_line = []
-        codes = line.split()
+        codes = normalize_line(line)
+
+        if len(codes) in (0, 1):
+            continue
+
         assert len(codes) == 4
         for bus, code in enumerate(codes):
             if code == "noop":
@@ -79,6 +111,26 @@ def assemble_code(in_name: str, out_name: str):
 
             if source.isdecimal():
                 port_source = FUPort(imm_fu, Direction.OUT, int(source) | (1 << 6))
+            elif source in symbol_table:
+                symbol_val = symbol_table[source]
+                if symbol_val < -(2**5) or symbol_val >= 2**5:
+                    print(
+                        f"Error: {symbol_val} does not fit in 6 bits, {source}->{dest}"
+                    )
+                port_source = FUPort(
+                    imm_fu, Direction.OUT, (symbol_table[source]) | (1 << 6)
+                )
+            elif source.removesuffix("+") in symbol_table:
+                relative_val = symbol_table[source[:-1]] - len(machine_code) - 1
+                if relative_val < -(2**5) or relative_val >= 2**5:
+                    print(
+                        f"Error: {relative_val} does not fit in 6 bits, {source}->{dest}"
+                    )
+                port_source = FUPort(
+                    imm_fu,
+                    Direction.OUT,
+                    relative_val | (1 << 6),
+                )
             else:
                 port_source = port_mapping[source]
 

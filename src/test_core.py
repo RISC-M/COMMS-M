@@ -97,6 +97,6 @@ async def test_ifetch_fu(dut, test_params: tuple[Path, Path | None]):
             for i, line in enumerate(f):
                 val = int(line.split()[2], 16)
                 assert registers[i].value == val, (
-                    f"register[{i}] should be {val:016x} ({int})"
+                    f"register[{i}] should be {val:016x} ({int(val)})"
                     f" it is set to {int(registers[i].value):016x} ({int(registers[i].value)})"
                 )

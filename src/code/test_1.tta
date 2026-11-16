@@ -1,4 +1,8 @@
+top:
+// Move 1 into Operand and 2 into trigger
 1->Oint     2->Tadd     noop        noop
+// Pull result into register 3
 noop        Rint->r3    noop        noop
-0->Tpc      noop        noop        noop
-5->r5       noop        noop        noop
+top+->Tpcr  Rpc->r4     bottom->r6  noop        // Now jump back to top and write pc+1 into r4
+bottom:
+5->r5       noop        noop        noop        // We can see this line never runs
