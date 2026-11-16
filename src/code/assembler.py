@@ -30,9 +30,10 @@ imm_fu = FunctionUnit("immediate", tuple(), (0, 1, 2, 3))
 
 port_mapping: dict[str, FUPort] = {
     "Tpc": FUPort(if_fu, Direction.IN, 8),
+    "Tpcr": FUPort(if_fu, Direction.IN, 9),
     "Rpc": FUPort(if_fu, Direction.OUT, 8),
-    "Oint": FUPort(int_fu, Direction.IN, 9),
-    "Tadd": FUPort(int_fu, Direction.IN, 10),
+    "Oint": FUPort(int_fu, Direction.IN, 10),
+    "Tadd": FUPort(int_fu, Direction.IN, 11),
     "Rint": FUPort(int_fu, Direction.OUT, 9),
 }
 
