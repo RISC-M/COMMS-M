@@ -20,7 +20,8 @@ module immediate_fu #(
             out_port #(
                 .N(1),
                 .ADDR_WIDTH(1),
-                .ADDRESS(1'b1)
+                .ADDRESS(1'b1),
+                .ALLOW_OVERWRITE(1)
             ) out_port_inst (
                 .clk(clk),
                 .rst_n(rst_n),

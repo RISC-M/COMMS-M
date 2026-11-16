@@ -5,7 +5,8 @@ module out_port #(
     parameter N = 2,
     parameter WIDTH = 32,
     parameter ADDR_WIDTH = 7,
-    parameter bit [ADDR_WIDTH-1:0] ADDRESS  = 7'b0000000
+    parameter bit [ADDR_WIDTH-1:0] ADDRESS  = 7'b0000000,
+    parameter ALLOW_OVERWRITE = 0
 )(
     input  wire  clk,
     input  wire  rst_n,
@@ -45,8 +46,13 @@ module out_port #(
     if (!rst_n)
         {data_reg, valid_reg} <= 0;
     else begin
-        if (data_read) 
-            {data_reg, valid_reg} <= {data, data_valid};
+        if (ALLOW_OVERWRITE) begin
+            if (data_valid)
+                {data_reg, valid_reg} <= {data, data_valid};
+        end else begin
+            if (data_read)
+                {data_reg, valid_reg} <= {data, data_valid};
+        end
     end
 
     // Wire up outputs
