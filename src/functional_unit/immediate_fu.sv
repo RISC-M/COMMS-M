@@ -29,7 +29,7 @@ module immediate_fu #(
                 .squash_line(0), // squash line isn't needed with ALLOW_OVERWRITE
                 .busses({out_busses[i]}),
                 .busses_valid({busses_valid[i]}),
-                .data(WIDTH'(out_addr_busses[i][ADDR_WIDTH-2:0])),
+                .data(WIDTH'($signed(out_addr_busses[i][ADDR_WIDTH-2:0]))),
                 .data_valid(1),
                 .data_read()
             );

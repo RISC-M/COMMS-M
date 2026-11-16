@@ -37,13 +37,13 @@ async def test_immediate_fu(dut):
     dut.rst_n.value = 1
 
     dut.out_addr_busses[0].value = 0b1010101
-    dut.out_addr_busses[1].value = 0b1101010
+    dut.out_addr_busses[1].value = 0b1001010
 
     await dut.clk.rising_edge
     await ReadWrite()
 
     assert dut.out_busses[0].value == 0b010101
-    assert dut.out_busses[1].value == 0b101010
+    assert dut.out_busses[1].value == 0b001010
 
     assert dut.busses_valid[0].value
     assert dut.busses_valid[1].value
@@ -57,14 +57,14 @@ async def test_immediate_fu(dut):
     assert dut.busses_valid[0].value == 0
     assert dut.busses_valid[1].value == 0
 
-    dut.out_addr_busses[0].value = 0b1010101
-    dut.out_addr_busses[1].value = 0b1101010
+    dut.out_addr_busses[0].value = 0b1111111
+    dut.out_addr_busses[1].value = 0b1001010
 
     await dut.clk.rising_edge
     await ReadWrite()
 
-    assert dut.out_busses[0].value == 0b010101
-    assert dut.out_busses[1].value == 0b101010
+    assert dut.out_busses[0].value == -1
+    assert dut.out_busses[1].value == 0b001010
 
     assert dut.busses_valid[0].value
     assert dut.busses_valid[1].value
