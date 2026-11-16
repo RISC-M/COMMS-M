@@ -104,3 +104,14 @@ async def test_register_fu_with_cond(dut):
     assert dut.read_busses[1].value == 5
     assert dut.read_busses_valid.value[0]
     assert dut.read_busses_valid.value[1]
+
+    # Read from r1 on bus 0 and none on bus 1
+    dut.raddr_busses[0].value = 0x1
+    dut.raddr_busses[1].value = 0x8
+
+    await dut.clk.rising_edge
+    await ReadWrite()
+
+    assert dut.read_busses[0].value == 0
+    assert dut.read_busses_valid.value[0]
+    assert dut.read_busses_valid.value[1] == 0
