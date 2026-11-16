@@ -8,6 +8,7 @@ module ifetch_fu #(
     parameter ADDR_WIDTH = 7,
     parameter WIDTH = 32,
     parameter bit [ADDR_WIDTH-1:0] PC_T = 1,
+    parameter bit [ADDR_WIDTH-1:0] PCR_T = 2,
     parameter bit [ADDR_WIDTH-1:0] PC_R = 1
 ) (
     input wire clk,
@@ -31,6 +32,7 @@ module ifetch_fu #(
     logic [64-1:0] instruction_mem [0:8191];
 
     logic [12:0] pc;
+    logic [12:0] next_pc;
 
     logic [WIDTH-1:0] pc_trigger;
     logic             pc_triggered;
@@ -51,11 +53,31 @@ module ifetch_fu #(
         .data_valid(pc_triggered)
     );
 
+    logic [WIDTH-1:0] pcr_trigger;
+    logic             pcr_triggered;
+    in_port #(
+        .N(IN_N),
+        .WIDTH(WIDTH),
+        .ADDR_WIDTH(ADDR_WIDTH),
+        .ADDRESS(PCR_T)
+    ) pcr_trigger_inst (
+        .clk(clk),
+        .rst_n(rst_n),
+        .busses(in_busses),
+        .addr_busses(in_addr_busses),
+        .status_bus(status_bus),
+        .squash_line(squash_line),
+        .condition_flags(in_condition_flags),
+        .data(pcr_trigger),
+        .data_valid(pcr_triggered)
+    );
+
     out_port #(
         .N(OUT_N),
         .WIDTH(WIDTH),
         .ADDR_WIDTH(ADDR_WIDTH),
-        .ADDRESS(PC_R)
+        .ADDRESS(PC_R),
+        .ALLOW_OVERWRITE(1)
     ) pc_result_port (
         .clk(clk),
         .rst_n(rst_n),
@@ -63,19 +85,25 @@ module ifetch_fu #(
         .squash_line(squash_line),
         .busses(out_busses),
         .busses_valid(busses_valid),
-        .data(pc_triggered ? pc_trigger : WIDTH'(pc+1)),
+        .data(WIDTH'(next_pc)),
         .data_valid(1),
         .data_read()
     );
+
+    always_comb begin
+        if (pc_triggered)
+            next_pc = 13'(pc_trigger);
+        else if (pcr_triggered)
+            next_pc = 13'($signed(pc) + $signed(pcr_trigger));
+        else
+            next_pc = pc + 1;
+    end
 
     always_ff @( posedge clk or negedge rst_n )
     if (!rst_n)
         pc <= 0;
     else
-        if (pc_triggered)
-            pc <= 13'(pc_trigger);
-        else
-            pc <= pc + 1;
+        pc <= next_pc;
 
     int i;
     logic [63:0] instr_group;

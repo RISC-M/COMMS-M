@@ -89,6 +89,7 @@ module core (
     // Connect ifetch trigger and result to busses 0 and 1
     ifetch_fu #(
         .PC_T(8),
+        .PCR_T(9),
         .PC_R(8)
     ) ifetch_fu_inst (
         .clk(clk),
@@ -112,8 +113,8 @@ module core (
     integer_fu #(
         .IN_N(2),
         .OUT_N(2),
-        .INT_O(9),
-        .ADD_T(10),
+        .INT_O(10),
+        .ADD_T(11),
         .INT_R(9)
     ) integer_fu_0 (
         .clk(clk),
