@@ -1,3 +1,4 @@
-1->r1       2->r2       noop        noop
-r1->Oint    r2->Tadd    noop        noop
+1->Oint     2->Tadd     noop        noop
 noop        Rint->r3    noop        noop
+0->Tpc      noop        noop        noop
+5->r5       noop        noop        noop
