@@ -13,7 +13,7 @@ module out_port #(
 
     // Inputs from busses
     input  wire [ADDR_WIDTH-1:0]  addr_busses  [0:N-1],
-
+    input  wire                   squash_line,
     // Outputs to busses
     output logic [WIDTH-1:0]      busses       [0:N-1],
     output logic                  busses_valid [0:N-1],
@@ -33,7 +33,7 @@ module out_port #(
         addr_match <= 0;
     else begin
         for (i = 0 ; i < N; i++)
-            addr_match[i] <= addr_busses[i] == ADDRESS;
+            addr_match[i] <= !squash_line & (addr_busses[i] == ADDRESS);
     end
 
     assign data_read = |addr_match | !valid_reg;

@@ -14,6 +14,7 @@ module core (
     logic [ADDR_WIDTH-1:0]  waddr_busses    [0:3];
     logic [1:0]             condition_flags [0:3];
     logic                   status_bus = 0;
+    logic                   squash_line = 0;
 
     // Bus Multiplexers
     localparam BUS_0_OUT_N = 3;
@@ -68,6 +69,7 @@ module core (
         .raddr_busses(raddr_busses),
         .condition_flags(condition_flags),
         .status_bus(status_bus),
+        .squash_line(squash_line),
         .write_busses(busses),
         .read_busses({bus_0_writers[0], bus_1_writers[0], bus_2_writers[0], bus_3_writers[0]}),
         .read_busses_valid({bus_0_writers_v[0], bus_1_writers_v[0], bus_2_writers_v[0], bus_3_writers_v[0]})
@@ -95,6 +97,7 @@ module core (
         .in_busses({busses[0], busses[1]}),
         .in_condition_flags({condition_flags[0], condition_flags[1]}),
         .status_bus(status_bus),
+        .squash_line(squash_line),
         .out_addr_busses({raddr_busses[0], raddr_busses[1]}),
         .out_busses({bus_0_writers[2], bus_1_writers[2]}),
         .busses_valid({bus_0_writers_v[2], bus_1_writers_v[2]}),
@@ -120,6 +123,7 @@ module core (
         .in_busses({busses[0], busses[1]}),
         .condition_flags({condition_flags[0], condition_flags[1]}),
         .status_bus(status_bus),
+        .squash_line(squash_line),
         .out_addr_busses({raddr_busses[1], raddr_busses[2]}),
         .out_busses({bus_1_writers[3], bus_2_writers[2]}),
         .busses_valid({bus_1_writers_v[3], bus_2_writers_v[2]})

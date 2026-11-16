@@ -24,7 +24,8 @@ module ifetch_fu #(
 
     output logic [ADDR_WIDTH-1:0] read_addr_busses   [0:N-1],  
     output logic [ADDR_WIDTH-1:0] write_addr_busses  [0:N-1],
-    output logic [1:0]            condition_flags    [0:N-1]
+    output logic [1:0]            condition_flags    [0:N-1],
+    output logic                  squash_line
 );
 
     logic [64-1:0] instruction_mem [0:8191];
@@ -44,6 +45,7 @@ module ifetch_fu #(
         .busses(in_busses),
         .addr_busses(in_addr_busses),
         .status_bus(status_bus),
+        .squash_line(squash_line),
         .condition_flags(in_condition_flags),
         .data(pc_trigger),
         .data_valid(pc_triggered)
@@ -58,6 +60,7 @@ module ifetch_fu #(
         .clk(clk),
         .rst_n(rst_n),
         .addr_busses(out_addr_busses),
+        .squash_line(squash_line),
         .busses(out_busses),
         .busses_valid(busses_valid),
         .data(pc_triggered ? pc_trigger : WIDTH'(pc+1)),
@@ -78,6 +81,8 @@ module ifetch_fu #(
     logic [63:0] instr_group;
     logic [15:0]  instr_single;
     always_comb begin
+        squash_line = pc_triggered;
+
         instr_group = instruction_mem[pc];
         for (i = 0; i < N; i++) begin
             instr_single = instr_group[((i + 1) * 16) - 1 -: 16];

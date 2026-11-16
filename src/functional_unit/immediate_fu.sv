@@ -26,6 +26,7 @@ module immediate_fu #(
                 .clk(clk),
                 .rst_n(rst_n),
                 .addr_busses({out_addr_busses[i][ADDR_WIDTH-1]}),
+                .squash_line(0), // squash line isn't needed with ALLOW_OVERWRITE
                 .busses({out_busses[i]}),
                 .busses_valid({busses_valid[i]}),
                 .data(WIDTH'(out_addr_busses[i][ADDR_WIDTH-2:0])),

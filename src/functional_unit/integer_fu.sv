@@ -17,6 +17,7 @@ module integer_fu #(
     input  wire  [WIDTH-1:0]      in_busses   [0:IN_N-1],
     input  wire  [1:0]            condition_flags [0:IN_N-1],
     input  wire                   status_bus,
+    input  wire                   squash_line,
 
     input  wire  [ADDR_WIDTH-1:0] out_addr_busses [0:OUT_N-1],
     output logic [WIDTH-1:0]      out_busses   [0:OUT_N-1],
@@ -36,6 +37,7 @@ module integer_fu #(
         .addr_busses(in_addr_busses),
         .condition_flags(condition_flags),
         .status_bus(status_bus),
+        .squash_line(squash_line),
         .data(add_trigger),
         .data_valid(add_triggered)
     );
@@ -55,6 +57,7 @@ module integer_fu #(
         .addr_busses(in_addr_busses),
         .condition_flags(condition_flags),
         .status_bus(status_bus),
+        .squash_line(squash_line),
         .data(operand),
         .data_valid(operand_valid)
     );
@@ -70,6 +73,7 @@ module integer_fu #(
         .clk(clk),
         .rst_n(rst_n),
         .addr_busses(out_addr_busses),
+        .squash_line(squash_line),
         .busses(out_busses),
         .busses_valid(busses_valid),
         .data(result),
