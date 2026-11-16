@@ -17,7 +17,7 @@ module core (
     logic                   squash_line = 0;
 
     // Bus Multiplexers
-    localparam BUS_0_OUT_N = 3;
+    localparam BUS_0_OUT_N = 4;
     logic [BUS_0_OUT_N-1:0] selected_bus_0;
     logic [WIDTH-1:0]       bus_0_writers   [0:BUS_0_OUT_N-1];
     logic                   bus_0_writers_v [0:BUS_0_OUT_N-1];
@@ -28,7 +28,7 @@ module core (
         .selected(selected_bus_0)
     );
 
-    localparam BUS_1_OUT_N = 4;
+    localparam BUS_1_OUT_N = 5;
     logic [BUS_1_OUT_N-1:0] selected_bus_1;
     logic [WIDTH-1:0]       bus_1_writers   [0:BUS_1_OUT_N-1];
     logic                   bus_1_writers_v [0:BUS_1_OUT_N-1];
@@ -128,5 +128,28 @@ module core (
         .out_addr_busses({raddr_busses[1], raddr_busses[2]}),
         .out_busses({bus_1_writers[3], bus_2_writers[2]}),
         .busses_valid({bus_1_writers_v[3], bus_2_writers_v[2]})
+    );
+
+    // Big immediate fu allow reading on bus 0,1
+    big_imm_fu #(
+        .IN_N(4),
+        .OUT_N(2),
+        .ADDR_WIDTH(ADDR_WIDTH),
+        .WIDTH(WIDTH),
+        .IMM_O(12),
+        .IMM_R(10)
+    ) big_imm_fu_inst (
+        .clk(clk),
+        .rst_n(rst_n),
+
+        .in_addr_busses(waddr_busses),
+        .in_busses(busses),
+        .condition_flags(condition_flags),
+        .status_bus(status_bus),
+        .squash_line(squash_line),
+
+        .out_addr_busses({raddr_busses[0], raddr_busses[1]}),
+        .out_busses({bus_0_writers[3], bus_1_writers[4]}),
+        .busses_valid({bus_0_writers_v[3], bus_1_writers_v[4]})
     );
 endmodule

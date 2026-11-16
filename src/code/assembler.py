@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from io import SEEK_SET
 import sys
 from enum import Enum
+import re
 
 
 @dataclass
@@ -24,10 +25,17 @@ class FUPort:
     address: int
 
 
+code_regex = (
+    r"^((?P<source>[a-zA-Z]*)|(?P<number>-?[0-9]*))(?P<relative>\+)?(?P<index>\[[0-3]\])?(?P<cond>\!|\?)?"
+    + r"->(?P<dest>r[0-7]|[a-zA-Z]*)"
+)
+
+
 if_fu = FunctionUnit("ifetch", (0, 1), (1, 2))
 rf_fu = FunctionUnit("register_file", (0, 1, 2, 3), (0, 1, 2, 3))
 int_fu = FunctionUnit("int", (0, 1), (1, 2))
 imm_fu = FunctionUnit("immediate", tuple(), (0, 1, 2, 3))
+big_imm_fu = FunctionUnit("big_imm", (0, 1, 2, 3), (0, 1))
 
 port_mapping: dict[str, FUPort] = {
     "Tpc": FUPort(if_fu, Direction.IN, 8),
@@ -36,6 +44,8 @@ port_mapping: dict[str, FUPort] = {
     "Oint": FUPort(int_fu, Direction.IN, 10),
     "Tadd": FUPort(int_fu, Direction.IN, 11),
     "Rint": FUPort(int_fu, Direction.OUT, 9),
+    "Oimm": FUPort(big_imm_fu, Direction.IN, 12),
+    "Rimm": FUPort(big_imm_fu, Direction.OUT, 10),
 }
 
 for i in range(8):
@@ -100,58 +110,77 @@ def assemble_code(in_name: str, out_name: str):
             if code == "noop":
                 code_line.append(Instr(0, 0))
                 continue
-            source, dest = code.split("->")
             instr = Instr(0, 0)
-            if dest[-1] == "?":
-                instr.condition = Condition.COND_TRUE
-                dest = dest[:-1]
-            elif dest[-1] == "!":
-                instr.condition = Condition.COND_FALSE
-                dest = dest[:-1]
 
-            if source.isdecimal():
-                port_source = FUPort(imm_fu, Direction.OUT, int(source) | (1 << 6))
-            elif source in symbol_table:
-                symbol_val = symbol_table[source]
-                if symbol_val < -(2**5) or symbol_val >= 2**5:
+            matches = re.match(code_regex, code)
+
+            if matches is None:
+                print(f"Error: {code} is not a valid assembly instruction")
+                exit(1)
+
+            group_dict = matches.groupdict()
+            numeric_value = None
+            source_port = None
+
+            if group_dict["number"]:
+                numeric_value = int(group_dict["number"])
+            elif group_dict["source"]:
+                if group_dict["source"] in symbol_table:
+                    numeric_value = symbol_table[group_dict["source"]]
+                else:
+                    source_port = port_mapping[group_dict["source"]]
+
+            if group_dict["relative"]:
+                if numeric_value is None:
                     print(
-                        f"Error: {symbol_val} does not fit in 6 bits, {source}->{dest}"
+                        f"Error: Relative addressing must only be used with a constant or symbol, {code}"
                     )
-                port_source = FUPort(
-                    imm_fu, Direction.OUT, (symbol_table[source]) | (1 << 6)
-                )
-            elif source.removesuffix("+") in symbol_table:
-                relative_val = symbol_table[source[:-1]] - len(machine_code) - 1
-                if relative_val < -(2**5) or relative_val >= 2**5:
+                    exit(1)
+                numeric_value = numeric_value - len(machine_code) - 1
+
+            if group_dict["index"]:
+                if numeric_value is None:
                     print(
-                        f"Error: {relative_val} does not fit in 6 bits, {source}->{dest}"
+                        f"Error: Indexing must only be used with a constant or symbol, {code}"
                     )
-                port_source = FUPort(
-                    imm_fu,
-                    Direction.OUT,
-                    relative_val | (1 << 6),
-                )
-            else:
-                port_source = port_mapping[source]
+                    exit(1)
 
-            port_dest = port_mapping[dest]
+                index = int(group_dict["index"][1])
+                numeric_value = (numeric_value >> (index * 6)) & ((1 << 6) - 1)
 
-            if port_source.direction not in (Direction.OUT, Direction.BIDI):
-                print(f"Error: {source} not a valid source port")
+            if group_dict["cond"]:
+                if group_dict["cond"] == "!":
+                    instr.condition = Condition.COND_FALSE
+                elif group_dict["cond"] == "?":
+                    instr.condition = Condition.COND_TRUE
+                else:
+                    print(f"Error: {group_dict['cond']} is not a valid condition")
+                    exit(1)
+
+            if numeric_value is not None:
+                if numeric_value < -(2**5) or numeric_value >= 2**6:
+                    print(f"Error: {numeric_value} does not fit in 6 bits, {code}")
+                    exit(1)
+                source_port = FUPort(imm_fu, Direction.OUT, numeric_value | (1 << 6))
+
+            dest_port = port_mapping[group_dict["dest"]]
+
+            if source_port.direction not in (Direction.OUT, Direction.BIDI):
+                print(f"Error: {code} does not have a valid source port")
                 exit(1)
-            if port_dest.direction not in (Direction.IN, Direction.BIDI):
-                print(f"Error: {source} not a valid destination port")
+            if dest_port.direction not in (Direction.IN, Direction.BIDI):
+                print(f"Error: {group_dict["dest"]} not a valid destination port")
                 exit(1)
 
-            if bus not in port_source.fu.out_busses:
-                print(f"Error: {source} not readable on bus {bus}")
+            if bus not in source_port.fu.out_busses:
+                print(f"Error: {source_port.fu} not readable on bus {bus}")
                 exit(1)
-            if bus not in port_dest.fu.in_busses:
-                print(f"Error: {source} not writeable on bus {bus}")
+            if bus not in dest_port.fu.in_busses:
+                print(f"Error: {dest_port.fu} not writeable on bus {bus}")
                 exit(1)
 
-            instr.source = port_source.address
-            instr.dest = port_dest.address
+            instr.source = source_port.address
+            instr.dest = dest_port.address
             code_line.append(instr)
         machine_code.append(code_line)
 

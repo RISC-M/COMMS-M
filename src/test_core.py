@@ -89,7 +89,7 @@ async def test_ifetch_fu(dut, test_params: tuple[Path, Path | None]):
     with open(machine_code_file.parent / (machine_code_file.stem + ".out"), "w") as f:
         for i in range(len(registers)):
             f.write(
-                f"{i} = 0x{int(registers[i].value):016x} ({int(registers[i].value)})\n"
+                f"{i} = 0x{int(registers[i].value):08x} ({int(registers[i].value)})\n"
             )
 
     if answer_file is not None:
@@ -97,6 +97,6 @@ async def test_ifetch_fu(dut, test_params: tuple[Path, Path | None]):
             for i, line in enumerate(f):
                 val = int(line.split()[2], 16)
                 assert registers[i].value == val, (
-                    f"register[{i}] should be {val:016x} ({int(val)})"
-                    f" it is set to {int(registers[i].value):016x} ({int(registers[i].value)})"
+                    f"register[{i}] should be {val:08x} ({int(val)})"
+                    f" it is set to {int(registers[i].value):08x} ({int(registers[i].value)})"
                 )

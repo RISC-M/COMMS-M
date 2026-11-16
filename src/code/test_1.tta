@@ -1,8 +1,11 @@
 top:
-// Move 1 into Operand and 2 into trigger
-1->Oint     2->Tadd     noop        noop
+// We want to add 25 to 50
+25[0]->Oimm     25[1]->Oimm     25[2]->Oimm     25[3]->Oimm
+noop            Rimm->Oint      noop            noop
+100[0]->Oimm    100[1]->Oimm    100[2]->Oimm    100[3]->Oimm
+noop            Rimm->Tadd      noop            noop
 // Pull result into register 3
-noop        Rint->r3    noop        noop
-top+->Tpcr  Rpc->r4     bottom->r6  noop        // Now jump back to top and write pc+1 into r4
+noop            Rint->r3        -1->r1          noop
+top+->Tpcr      Rpc->r4         bottom->r6      noop        // Now jump back to top and write pc+1 into r4
 bottom:
-5->r5       noop        noop        noop        // We can see this line never runs
+5->r5           noop            noop            noop        // We can see this line never runs
