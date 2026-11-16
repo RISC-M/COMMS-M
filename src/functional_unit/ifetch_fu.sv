@@ -109,7 +109,7 @@ module ifetch_fu #(
     logic [63:0] instr_group;
     logic [15:0]  instr_single;
     always_comb begin
-        squash_line = pc_triggered;
+        squash_line = pc_triggered | pcr_triggered;
 
         instr_group = instruction_mem[pc];
         for (i = 0; i < N; i++) begin
