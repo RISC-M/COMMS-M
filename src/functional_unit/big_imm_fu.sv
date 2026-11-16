@@ -23,7 +23,9 @@ module big_imm_fu #(
     output logic                  busses_valid [0:OUT_N-1]
 );
 
-    logic [(IN_N * ADDR_WIDTH) - 1:0] big_immediate;
+    localparam IMMEDIATE_WIDTH = ADDR_WIDTH-1;
+
+    logic [(IN_N * IMMEDIATE_WIDTH) - 1:0] big_immediate;
     logic [IN_N-1:0] big_immediate_part_v;
     genvar i;
     generate
@@ -46,7 +48,7 @@ module big_imm_fu #(
                 .data(bus_data),
                 .data_valid(big_immediate_part_v[i])
             );
-            assign big_immediate[(i+1) * ADDR_WIDTH - 1 -: ADDR_WIDTH] = ADDR_WIDTH'(bus_data);
+            assign big_immediate[(i+1) * IMMEDIATE_WIDTH - 1 -: IMMEDIATE_WIDTH] = IMMEDIATE_WIDTH'(bus_data);
         end
     endgenerate    
 
