@@ -26,7 +26,7 @@ class FUPort:
 
 
 code_regex = (
-    r"^((?P<source>[a-zA-Z]*)|(?P<number>-?[0-9]*))(?P<relative>\+)?(?P<index>\[[0-3]\])?(?P<cond>\!|\?)?"
+    r"^((?P<source>r[0-7]|[a-zA-Z]*)|(?P<number>-?[0-9]*))(?P<relative>\+)?(?P<index>\[[0-3]\])?(?P<cond>\!|\?)?"
     + r"->(?P<dest>r[0-7]|[a-zA-Z]*)"
 )
 
@@ -47,9 +47,9 @@ port_mapping: dict[str, FUPort] = {
     "Rint": FUPort(int_fu, Direction.OUT, 9),
     "Oimm": FUPort(big_imm_fu, Direction.IN, 12),
     "Rimm": FUPort(big_imm_fu, Direction.OUT, 10),
-    "Tc_eq": FUPort(comp_fu, Direction.IN, 13),
-    "Tc_ne": FUPort(comp_fu, Direction.IN, 14),
-    "Tc_gt": FUPort(comp_fu, Direction.IN, 15),
+    "Tceq": FUPort(comp_fu, Direction.IN, 13),
+    "Tcne": FUPort(comp_fu, Direction.IN, 14),
+    "Tcgt": FUPort(comp_fu, Direction.IN, 15),
     "Ocmp": FUPort(comp_fu, Direction.IN, 16),
     "Rcmp": FUPort(comp_fu, Direction.OUT, 11),
 }
