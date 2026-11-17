@@ -2,18 +2,15 @@
 `timescale 1ps/1ps
 
 module comp_fu #(
-    //I made these 4 becuase we talked about the comparator being able to connect to all 4 busses
     parameter IN_N = 4,
-    //I think we don't have any out busses, just stat.
-    //parameter OUT_N = 4,
+    parameter OUT_N = 2,
     parameter ADDR_WIDTH = 7,
     parameter WIDTH = 32,
-    parameter bit [ADDR_WIDTH-1:0] COMPEQ_T = 7,   //TO-DO: arbitrary port addresses, we have to change that
-    parameter bit [ADDR_WIDTH-1:0] COMPNEQ_T = 8,
-    //I can't remember if we agreed up on the 3 triggers or'ed together or if we were sticking to 2, so I'll put this just in case
-    parameter bit [ADDR_WIDTH-1:0] COMPGT_T = 9,
-    parameter bit [ADDR_WIDTH-1:0] COMP_O = 10
-    //Do we need a result register?
+    parameter bit [ADDR_WIDTH-1:0] COMPEQ_T = 0,
+    parameter bit [ADDR_WIDTH-1:0] COMPNEQ_T = 1,
+    parameter bit [ADDR_WIDTH-1:0] COMPGT_T = 2,
+    parameter bit [ADDR_WIDTH-1:0] COMP_O = 3,
+    parameter bit [ADDR_WIDTH-1:0] COMP_R = 0
 )(
     input  wire clk,
     input  wire rst_n,
@@ -21,22 +18,13 @@ module comp_fu #(
     input  wire  [ADDR_WIDTH-1:0] in_addr_busses  [IN_N-1:0],
     input  wire  [WIDTH-1:0]      in_busses       [IN_N-1:0],
     input  wire  [1:0]            condition_flags [IN_N-1:0],
-    input  wire                   status_bus, 
-    
-    //See above comment on output busses.
 
-    /*input  wire  [ADDR_WIDTH-1:0] out_addr_busses [OUT_N-1:0],
+    input  wire  [ADDR_WIDTH-1:0] out_addr_busses [OUT_N-1:0],
     output logic [WIDTH-1:0]      out_busses      [OUT_N-1:0],
-    output logic                  busses_valid    [OUT_N-1:0],*/
+    output logic                  busses_valid    [OUT_N-1:0],
 
-    //new_status_bus needs to be an output to the rest of the in_ports of the other FUs I think
-    //Also takes status_bus as an input
-    //Do we want status bus to be registered when comparator is not used?
-    output wire                   new_status_bus
+    output logic                   status_bus
 );
-    
-    //Just to clarify, do we want conditional comparator operation too if its setting the status_bus?
-    //Should the status bus be registered/hold its previous value until the next comparator operation?
 
     logic [WIDTH-1:0]   equal_trigger;
     logic               equal_triggered;
@@ -98,7 +86,8 @@ module comp_fu #(
         .N(IN_N),
         .WIDTH(WIDTH),
         .ADDR_WIDTH(ADDR_WIDTH),
-        .ADDRESS(COMP_O)
+        .ADDRESS(COMP_O),
+        .REGISTER_WITH_BYPASS(1)
     ) operand_trigger_inst (
         .clk(clk),
         .rst_n(rst_n),
@@ -115,13 +104,39 @@ module comp_fu #(
     logic not_equal;
     logic greater_than;
 
+    logic next_status_bus, next_status_bus_valid;
+
+    out_port #(
+        .N(OUT_N),
+        .WIDTH(WIDTH),
+        .ADDR_WIDTH(ADDR_WIDTH),
+        .ADDRESS(COMP_R)
+    ) comp_res_inst (
+        .clk(clk),
+        .rst_n(rst_n),
+        
+        .addr_busses(out_addr_busses),
+        .busses(out_busses),
+        .busses_valid(busses_valid),
+        .data({31'd0, next_status_bus}),
+        .data_valid(next_status_bus_valid),
+        .data_read()
+    );
+
 
     always_comb begin
         equal = (equal_trigger == operand_trigger) & (equal_triggered & operand_triggered);
-        not_equal = (not_equal_trigger == operand_trigger) & (not_equal_triggered & operand_triggered);
-        greater_than = (GT_trigger == operand_trigger) & (GT_triggered & operand_triggered);
+        not_equal = (not_equal_trigger != operand_trigger) & (not_equal_triggered & operand_triggered);
+        greater_than = (GT_trigger > operand_trigger) & (GT_triggered & operand_triggered);
+
+        next_status_bus = equal | not_equal | greater_than;
+        next_status_bus_valid = operand_triggered & (equal_triggered | not_equal_triggered | GT_triggered);
     end
 
-    assign new_status_bus = equal | not_equal | greater_than;
-    
+    always_ff @( posedge clk or negedge rst_n )
+    if (!rst_n)
+        status_bus <= 0;
+    else if (next_status_bus_valid)
+        status_bus <= next_status_bus;
+
 endmodule

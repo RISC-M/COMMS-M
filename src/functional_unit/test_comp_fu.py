@@ -2,7 +2,6 @@ import cocotb
 from cocotb.triggers import ReadWrite, Timer
 from test_helpers import generate_runner, get_source_files
 
-# Little confused on how we want to write the test bench here
 
 def test_comp_fu_runner():
     generate_runner(
@@ -10,6 +9,7 @@ def test_comp_fu_runner():
         get_source_files(__file__, ["comp_fu.sv"], []),
         "comp_fu",
         __name__,
+        {"IN_N": 2},
     )
 
 
@@ -36,46 +36,34 @@ async def test_comp_fu(dut):
     await ReadWrite()
     dut.rst_n.value = 1
 
-    dut.in_addr_busses[0].value = 0x7
-    dut.in_addr_busses[1].value = 0x10
+    dut.in_addr_busses[0].value = 0
+    dut.in_addr_busses[1].value = 3
 
     await dut.clk.rising_edge
     await ReadWrite()
-    # Write operands to O and T port
+    # Write operands to Tcmp_e Ocmp
     dut.in_busses[0].value = 5
     dut.in_busses[1].value = 10
 
-    
-    # Write address to out port
-    #dut.out_addr_busses[0].value = 0x2
-    #dut.out_addr_busses[1].value = 0x0
-
-    # Write next cycle addresses to in ports
-    dut.in_addr_busses[0].value = 0x8
-    #dut.in_addr_busses[1].value = 0x5
     await dut.clk.rising_edge
     await ReadWrite()
 
-    # Assert correct sum is on output bus
-    assert dut.out_busses[0].value == 15
-    assert dut.busses_valid[0].value == 1
+    # Assert status bus is false
+    assert dut.status_bus.value == 0
 
-    # Write to trigger port with new data
+    # Write to Tcmp_e
     dut.in_busses[0].value = 10
 
-    # Write next cycle addresses to in ports
-    dut.in_addr_busses[0].value = 0x5
-    dut.in_addr_busses[1].value = 0x5
+    # Stop writing to ports
+    dut.in_addr_busses[0].value = 5
+    dut.in_addr_busses[1].value = 5
+
+    dut.out_addr_busses[0].value = 0
 
     await dut.clk.rising_edge
     await ReadWrite()
 
-    # Assert correct sum is on output bus
-    assert dut.out_busses[0].value == 20
-    assert dut.busses_valid[0].value == 1
+    assert dut.status_bus.value == 1
 
-    await dut.clk.rising_edge
-    await ReadWrite()
-
-    # Assert no sum is on output bus
-    assert dut.busses_valid[0].value == 0
+    assert dut.out_busses[0].value == 1
+    assert dut.busses_valid[0].value
