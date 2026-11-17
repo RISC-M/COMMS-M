@@ -18,6 +18,7 @@ module comp_fu #(
     input  wire  [ADDR_WIDTH-1:0] in_addr_busses  [IN_N-1:0],
     input  wire  [WIDTH-1:0]      in_busses       [IN_N-1:0],
     input  wire  [1:0]            condition_flags [IN_N-1:0],
+    input  wire                   squash_line,
 
     input  wire  [ADDR_WIDTH-1:0] out_addr_busses [OUT_N-1:0],
     output logic [WIDTH-1:0]      out_busses      [OUT_N-1:0],
@@ -40,6 +41,7 @@ module comp_fu #(
         .addr_busses(in_addr_busses),
         .condition_flags(condition_flags),
         .status_bus(status_bus),
+        .squash_line(squash_line),
         .data(equal_trigger),
         .data_valid(equal_triggered)
     );
@@ -58,6 +60,7 @@ module comp_fu #(
         .addr_busses(in_addr_busses),
         .condition_flags(condition_flags),
         .status_bus(status_bus),
+        .squash_line(squash_line),
         .data(not_equal_trigger),
         .data_valid(not_equal_triggered)
     );
@@ -76,6 +79,7 @@ module comp_fu #(
         .addr_busses(in_addr_busses),
         .condition_flags(condition_flags),
         .status_bus(status_bus),
+        .squash_line(squash_line),
         .data(GT_trigger),
         .data_valid(GT_triggered)
     );
@@ -95,6 +99,7 @@ module comp_fu #(
         .addr_busses(in_addr_busses),
         .condition_flags(condition_flags),
         .status_bus(status_bus),
+        .squash_line(squash_line),
         .data(operand_trigger),
         .data_valid(operand_triggered)
     );
@@ -110,7 +115,8 @@ module comp_fu #(
         .N(OUT_N),
         .WIDTH(WIDTH),
         .ADDR_WIDTH(ADDR_WIDTH),
-        .ADDRESS(COMP_R)
+        .ADDRESS(COMP_R),
+        .ALLOW_OVERWRITE(1)
     ) comp_res_inst (
         .clk(clk),
         .rst_n(rst_n),
@@ -118,6 +124,7 @@ module comp_fu #(
         .addr_busses(out_addr_busses),
         .busses(out_busses),
         .busses_valid(busses_valid),
+        .squash_line(squash_line),
         .data({31'd0, next_status_bus}),
         .data_valid(next_status_bus_valid),
         .data_read()
