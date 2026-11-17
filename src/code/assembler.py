@@ -36,6 +36,7 @@ rf_fu = FunctionUnit("register_file", (0, 1, 2, 3), (0, 1, 2, 3))
 int_fu = FunctionUnit("int", (0, 1), (1, 2))
 imm_fu = FunctionUnit("immediate", tuple(), (0, 1, 2, 3))
 big_imm_fu = FunctionUnit("big_imm", (0, 1, 2, 3), (0, 1))
+comp_fu = FunctionUnit("comp", (0, 1, 2, 3), (1, 2))
 
 port_mapping: dict[str, FUPort] = {
     "Tpc": FUPort(if_fu, Direction.IN, 8),
@@ -46,6 +47,11 @@ port_mapping: dict[str, FUPort] = {
     "Rint": FUPort(int_fu, Direction.OUT, 9),
     "Oimm": FUPort(big_imm_fu, Direction.IN, 12),
     "Rimm": FUPort(big_imm_fu, Direction.OUT, 10),
+    "Tc_eq": FUPort(comp_fu, Direction.IN, 13),
+    "Tc_ne": FUPort(comp_fu, Direction.IN, 14),
+    "Tc_gt": FUPort(comp_fu, Direction.IN, 15),
+    "Ocmp": FUPort(comp_fu, Direction.IN, 16),
+    "Rcmp": FUPort(comp_fu, Direction.OUT, 11),
 }
 
 for i in range(8):
