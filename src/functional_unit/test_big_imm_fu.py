@@ -42,23 +42,23 @@ async def test_big_imm_fu(dut):
     await dut.clk.rising_edge
     await ReadWrite()
 
-    dut.in_busses[0].value = 0b1110001
-    dut.in_busses[1].value = 0b0001110
+    dut.in_busses[0].value = 0b110001
+    dut.in_busses[1].value = 0b001110
 
     dut.out_addr_busses[0].value = 0
 
     await dut.clk.rising_edge
     await ReadWrite()
 
-    assert dut.out_busses[0].value == 0b00011101110001
+    assert dut.out_busses[0].value == 0b001110110001
     assert dut.busses_valid[0].value
 
-    dut.in_busses[0].value = 0b1110001
-    dut.in_busses[1].value = 0b1001110
+    dut.in_busses[0].value = 0b110001
+    dut.in_busses[1].value = 0b101110
 
     await dut.clk.rising_edge
     await ReadWrite()
 
-    assert int(dut.out_busses[0].value) & ((1 << 14) - 1) == 0b10011101110001
-    assert int(dut.out_busses[0].value) & ((1 << 14)) != 0
+    assert int(dut.out_busses[0].value) & ((1 << 12) - 1) == 0b101110110001
+    assert int(dut.out_busses[0].value) & ((1 << 12)) != 0
     assert dut.busses_valid[0].value
