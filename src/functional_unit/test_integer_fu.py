@@ -37,6 +37,8 @@ async def test_integer_fu(dut):
 
     dut.in_addr_busses[0].value = 0x0
     dut.in_addr_busses[1].value = 0x1
+    dut.condition_flags[0].value = 0
+    dut.condition_flags[1].value = 0
 
     await dut.clk.rising_edge
     await ReadWrite()

@@ -23,6 +23,10 @@ def generate_runner(
             "--trace-structs",
             "-F",
             str(Path(__file__).resolve().parent.parent / "verilator.vc"),
+            "--x-initial",
+            "unique",
+            "--x-assign",
+            "unique",
         ],
         parameters=parameters if parameters else {},
     )
@@ -34,6 +38,7 @@ def generate_runner(
         test_args=[
             "--trace-file",
             f"../waves/{waves_name if waves_name else toplevel}.fst",
+            "+verilator+rand+reset+2",
         ],
     )
 

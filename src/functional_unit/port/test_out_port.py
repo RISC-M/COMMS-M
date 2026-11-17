@@ -32,6 +32,8 @@ async def test_out_port(dut):
     await ReadWrite()
     dut.rst_n.value = 1
 
+    dut.squash_line.value = 0
+
     dut.data.value = 0xBEEFBEEF
     dut.data_valid.value = 1
 

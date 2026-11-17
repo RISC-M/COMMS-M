@@ -39,6 +39,8 @@ async def test_register_fu_no_cond(dut):
     # Write to r0 on bus 0 and r1 on bus 1
     dut.waddr_busses[0].value = 0x0
     dut.waddr_busses[1].value = 0x1
+    dut.condition_flags[0].value = 0b00
+    dut.condition_flags[1].value = 0b00
 
     await dut.clk.rising_edge
     await ReadWrite()

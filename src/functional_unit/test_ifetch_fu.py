@@ -83,6 +83,7 @@ async def test_ifetch_fu(dut):
     assert dut.out_busses[0].value == 0
 
     dut.in_addr_busses[0].value = 1
+    dut.in_condition_flags[0].value = 0
 
     await dut.clk.rising_edge
     await ReadWrite()
@@ -105,11 +106,13 @@ async def test_ifetch_fu(dut):
     assert dut.condition_flags[3].value == 0
 
     assert dut.out_busses[0].value == 1
+    assert dut.squash_line.value == 1
 
     await dut.clk.rising_edge
     await ReadWrite()
 
     assert dut.out_busses[0].value == 10
+    assert dut.squash_line.value == 0
 
     dut.in_addr_busses[0].value = 2  # Write to pcrelative jump
 
@@ -117,7 +120,7 @@ async def test_ifetch_fu(dut):
     await ReadWrite()
 
     dut.in_busses[0].value = -2  # Move back 2 instructions
-
+    assert dut.squash_line.value == 1
     await dut.clk.rising_edge
     await ReadWrite()
 

@@ -43,6 +43,9 @@ async def test_in_port_bypass(dut):
     dut.addr_busses[0].value = 0x0
     dut.addr_busses[1].value = 0x1
     dut.condition_flags[0].value = 0b00
+    dut.condition_flags[1].value = 0b00
+
+    dut.status_bus.value = 0
 
     await ReadOnly()
     assert dut.data_valid.value == 0

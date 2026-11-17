@@ -42,6 +42,9 @@ async def test_comp_fu(dut):
     dut.out_addr_busses[0].value = 5
     dut.out_addr_busses[1].value = 5
 
+    dut.condition_flags[0].value = 0
+    dut.condition_flags[1].value = 0
+
     await dut.clk.rising_edge
     await ReadWrite()
     # Write operands to Tcmp_e Ocmp

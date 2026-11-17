@@ -21,7 +21,6 @@ async def generate_clock(dut):
         dut.clk.value = 1
         await Timer(1, unit="ns")
 
-#Everything beyond this point I'm still very confused ab - Dhruv
 
 @cocotb.test()
 async def test_shifter_fu(dut):
@@ -38,6 +37,8 @@ async def test_shifter_fu(dut):
 
     dut.in_addr_busses[0].value = 0x4
     dut.in_addr_busses[1].value = 0x1
+    dut.condition_flags[0].value = 0b01
+    dut.condition_flags[1].value = 0b11
 
     await dut.clk.rising_edge
     await ReadWrite()

@@ -66,7 +66,7 @@ module register_fu #(
     int k;
     always_ff @(posedge clk or negedge rst_n)
     if (!rst_n)
-        for (k = 0; k < N; k++)
+        for (k = 0; k < REGISTER_COUNT; k++)
             registers[k] <= 0;
     else
         for (k = 0; k < N; k++)
