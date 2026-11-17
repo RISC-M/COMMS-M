@@ -5,14 +5,15 @@ module out_port #(
     parameter N = 2,
     parameter WIDTH = 32,
     parameter ADDR_WIDTH = 7,
-    parameter bit [ADDR_WIDTH-1:0] ADDRESS  = 7'b0000000
+    parameter bit [ADDR_WIDTH-1:0] ADDRESS  = 7'b0000000,
+    parameter ALLOW_OVERWRITE = 0
 )(
     input  wire  clk,
     input  wire  rst_n,
 
     // Inputs from busses
     input  wire [ADDR_WIDTH-1:0]  addr_busses  [0:N-1],
-
+    input  wire                   squash_line,
     // Outputs to busses
     output logic [WIDTH-1:0]      busses       [0:N-1],
     output logic                  busses_valid [0:N-1],
@@ -32,7 +33,7 @@ module out_port #(
         addr_match <= 0;
     else begin
         for (i = 0 ; i < N; i++)
-            addr_match[i] <= addr_busses[i] == ADDRESS;
+            addr_match[i] <= !squash_line & (addr_busses[i] == ADDRESS);
     end
 
     assign data_read = |addr_match | !valid_reg;
@@ -45,8 +46,13 @@ module out_port #(
     if (!rst_n)
         {data_reg, valid_reg} <= 0;
     else begin
-        if (data_read) 
-            {data_reg, valid_reg} <= {data, data_valid};
+        if (ALLOW_OVERWRITE) begin
+            if (data_valid)
+                {data_reg, valid_reg} <= {data, data_valid};
+        end else begin
+            if (data_read)
+                {data_reg, valid_reg} <= {data, data_valid};
+        end
     end
 
     // Wire up outputs

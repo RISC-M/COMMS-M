@@ -14,10 +14,11 @@ module register_fu #(
     input  wire  [ADDR_WIDTH-1:0] raddr_busses [0:N-1],
     input  wire  [1:0]            condition_flags [0:N-1],
     input  wire                   status_bus,
+    input  wire                   squash_line,
 
     input  wire  [WIDTH-1:0]      write_busses [0:N-1],
     output logic [WIDTH-1:0]      read_busses  [0:N-1],
-    output logic [N-1:0]          read_busses_valid
+    output logic                  read_busses_valid [0:N-1]
 );
 
     localparam bit [ADDR_WIDTH-1:0] ADDRESS_MASK_INV = ~ADDRESS_MASK;
@@ -33,7 +34,8 @@ module register_fu #(
     logic condition_met;
     always_ff @(posedge clk or negedge rst_n)
     if (!rst_n) begin
-        read_busses_valid <= 0;
+        for (i = 0 ; i < N; i++)
+            read_busses_valid[i] <= 0;
         write_bus_valid <= 0;
     end
     else begin
@@ -42,7 +44,7 @@ module register_fu #(
             read_bus_reg[i] <= ADDRESS_BITS'(raddr_busses[i] & ADDRESS_MASK);
             
             condition_met = condition_flags[i][0] ? (condition_flags[i][1] ? status_bus : ~status_bus) : 1;
-            write_bus_valid[i] <= ~|(waddr_busses[i] & ADDRESS_MASK_INV) & condition_met;
+            write_bus_valid[i] <= !squash_line & ~|(waddr_busses[i] & ADDRESS_MASK_INV) & condition_met;
             write_bus_reg[i] <= ADDRESS_BITS'(waddr_busses[i] & ADDRESS_MASK);
         end
     end

@@ -20,14 +20,16 @@ module immediate_fu #(
             out_port #(
                 .N(1),
                 .ADDR_WIDTH(1),
-                .ADDRESS(1'b1)
+                .ADDRESS(1'b1),
+                .ALLOW_OVERWRITE(1)
             ) out_port_inst (
                 .clk(clk),
                 .rst_n(rst_n),
                 .addr_busses({out_addr_busses[i][ADDR_WIDTH-1]}),
+                .squash_line(0), // squash line isn't needed with ALLOW_OVERWRITE
                 .busses({out_busses[i]}),
                 .busses_valid({busses_valid[i]}),
-                .data(WIDTH'(out_addr_busses[i][ADDR_WIDTH-2:0])),
+                .data(WIDTH'($signed(out_addr_busses[i][ADDR_WIDTH-2:0]))),
                 .data_valid(1),
                 .data_read()
             );

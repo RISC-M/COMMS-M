@@ -13,8 +13,9 @@ module in_port #(
 
     input  wire  [WIDTH-1:0]      busses          [0:N-1],
     input  wire  [ADDR_WIDTH-1:0] addr_busses     [0:N-1],
-    input  wire                   status_bus,
     input  wire  [1:0]            condition_flags [0:N-1],
+    input  wire                   status_bus,
+    input  wire                   squash_line,
 
     output logic [WIDTH-1:0]      data,
     output logic                  data_valid
@@ -30,7 +31,7 @@ module in_port #(
         bus_valid <= 0;
     else begin
         for (i = 0 ; i < N; i++) begin
-            bus_valid[i] <= addr_busses[i] == ADDRESS;
+            bus_valid[i] <= !squash_line & (addr_busses[i] == ADDRESS);
             condition_flags_r[i] <= condition_flags[i];
         end
     end

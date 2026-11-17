@@ -17,6 +17,7 @@ module shifter_fu #(
     input  wire  [WIDTH-1:0]      in_busses       [IN_N-1:0],
     input  wire  [1:0]            condition_flags [IN_N-1:0],
     input  wire                   status_bus,
+    input  wire                   squash_line,
     
     input  wire  [ADDR_WIDTH-1:0] out_addr_busses [OUT_N-1:0],
     output logic [WIDTH-1:0]      out_busses      [OUT_N-1:0],
@@ -57,6 +58,7 @@ module shifter_fu #(
         .busses(in_busses),
         .condition_flags(condition_flags),
         .status_bus(status_bus),
+        .squash_line(squash_line),
         .data(shift_operand),
         .data_valid(shift_operand_valid)
     );
@@ -71,17 +73,15 @@ module shifter_fu #(
     ) shift_result_inst (
         .clk(clk),
         .rst_n(rst_n),
-        .addr_busses(out_addr_busses),  
+        .addr_busses(out_addr_busses),
+        .squash_line(squash_line),
         .busses(out_busses),
         .busses_valid(busses_valid),
         .data(shift_result),
         .data_valid(shift_valid),
-        //8. IDK what to do with this port
         .data_read()
     );
 
-    //Data update:
-    //9. Entirely unsure of if we even need 2 ports, I wrote the second port in just in case
     always_comb begin
         shift_result = shift_operand << 1;
         shift_valid = shift_operand_valid;
