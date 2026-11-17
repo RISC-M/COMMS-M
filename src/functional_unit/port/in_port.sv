@@ -46,8 +46,8 @@ module in_port #(
         for (j = 0; j < N; j++)
         if (bus_valid[j]) begin
             data_in = busses[j];
-            data_in_valid = condition_flags[j][0] ? 
-                (condition_flags[j][1] ? status_bus : ~status_bus) 
+            data_in_valid = condition_flags_r[j][0] ? 
+                (condition_flags_r[j][1] ? status_bus : ~status_bus) 
                 : 1;
         end
     end

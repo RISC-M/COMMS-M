@@ -86,9 +86,9 @@ async def test_in_port_bypass(dut):
     assert dut.data.value == 0xCAFECAFE
     assert dut.data_valid.value == 1
 
-    # Conditionally execute only on false
+    # Conditionally read bus 0 on false and bus 1 on true
     dut.condition_flags[0].value = 0b01
-    dut.status_bus.value = 0
+    dut.condition_flags[1].value = 0b11
 
     await dut.clk.rising_edge
     await ReadWrite()
@@ -96,13 +96,11 @@ async def test_in_port_bypass(dut):
     assert dut.data.value == 0xBEEFBEEF
     assert dut.data_valid.value == 1
 
-    dut.condition_flags[1].value = 0b01
+    # We should now switch and read bus 1 this cycle
     dut.status_bus.value = 1
-    dut.addr_busses[0].value = 0x1
-    dut.addr_busses[1].value = 0x0
 
     await dut.clk.rising_edge
     await ReadWrite()
     # We should have kept the value
-    assert dut.data.value == 0xBEEFBEEF
+    assert dut.data.value == 0xCAFECAFE
     assert dut.data_valid.value == 1
