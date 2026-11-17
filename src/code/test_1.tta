@@ -1,11 +1,10 @@
+// Initialize register r1 with 25
+25[0]->Oimm     25[1]->Oimm     25[2]->Oimm     25[3]->Oimm 
+-1->Oint        Rimm->r1        0->Ocmp         noop
 top:
-// We want to add 25 to 50
-25[0]->Oimm     25[1]->Oimm     25[2]->Oimm     25[3]->Oimm
-noop            Rimm->Oint      noop            noop
-100[0]->Oimm    100[1]->Oimm    100[2]->Oimm    100[3]->Oimm
-noop            Rimm->Tadd      noop            noop
-// Pull result into register 3
-noop            Rint->r3        -1->r1          noop
-top+->Tpcr      Rpc->r4         bottom->r6      noop        // Now jump back to top and write pc+1 into r4
-bottom:
-5->r5           noop            noop            noop        // We can see this line never runs
+// Subtract 1 from r1 ans then store back in r1 and compare
+noop            r1->Tadd        noop            noop
+noop            Rint->r1        Rint->Tceq      noop
+// Jump back to top if comparison if false
+noop            top+!->Tpcr     noop            noop
+5->r5           noop            noop            noop

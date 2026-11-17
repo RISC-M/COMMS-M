@@ -81,7 +81,7 @@ async def test_ifetch_fu(dut, test_params: tuple[Path, Path | None]):
     await ReadWrite()
     dut.rst_n.value = 1
 
-    for i in range(25):
+    for i in range(200):
         await dut.clk.rising_edge
 
     registers = dut.register_fu_inst.registers
