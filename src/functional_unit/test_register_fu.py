@@ -42,6 +42,9 @@ async def test_register_fu_no_cond(dut):
     dut.condition_flags[0].value = 0b00
     dut.condition_flags[1].value = 0b00
 
+    dut.status_bus.value = 0
+    dut.squash_line.value = 0
+
     await dut.clk.rising_edge
     await ReadWrite()
     # 5 to address 0 and 10 to address 1

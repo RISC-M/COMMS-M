@@ -63,7 +63,7 @@ async def test_immediate_fu(dut):
     await dut.clk.rising_edge
     await ReadWrite()
 
-    assert dut.out_busses[0].value == -1
+    assert dut.out_busses[0].value == (1 << 32) - 1
     assert dut.out_busses[1].value == 0b001010
 
     assert dut.busses_valid[0].value

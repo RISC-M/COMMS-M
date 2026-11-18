@@ -40,6 +40,9 @@ async def test_shifter_fu(dut):
     dut.condition_flags[0].value = 0b01
     dut.condition_flags[1].value = 0b11
 
+    dut.status_bus.value = 0
+    dut.squash_line.value = 0
+
     await dut.clk.rising_edge
     await ReadWrite()
     # Write operands to O and T port

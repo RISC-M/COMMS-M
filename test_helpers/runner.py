@@ -39,6 +39,7 @@ def generate_runner(
             "--trace-file",
             f"../waves/{waves_name if waves_name else toplevel}.fst",
             "+verilator+rand+reset+2",
+            "+verilator+seed+1",
         ],
     )
 
